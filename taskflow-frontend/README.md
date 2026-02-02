@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Taskflow Vacation — Frontend
 
-## Getting Started
+Uma aplicação Next.js (React + Tailwind) que fornece a interface para gestão de férias: solicitação, aprovação, rejeição, administração de usuários e configurações.
 
-First, run the development server:
+## Visão Geral
+- **Páginas**: Dashboard, Pedidos (Requests), Equipe (Team), Usuários, Admin/Configurações, Login.
+- **Arquitetura**: Roteamento via `app/`, componentes reutilizáveis em `components/ui`, hooks em `hooks/`, serviços REST em `services/`.
+- **Autenticação**: JWT armazenado em `localStorage` e inserido automaticamente em `Authorization: Bearer` nas requisições.
+- **Perfis de acesso**: `ADMIN`, `MANAGER` (Gestor) e `COLLABORATOR` (Colaborador).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Pré-requisitos
+- Node.js 20+ (recomendado: 20 LTS)
+- npm 10+
+- Backend rodando (veja o README do backend) acessível em `http://localhost:8080/taskflow` (padrão)
+
+## Configuração
+- Variáveis de ambiente do Front:
+	- `NEXT_PUBLIC_API_BASE_URL`: URL base da API. Padrão: `http://localhost:8080/taskflow`
+
+Crie um arquivo `.env.local` (opcional):
+
+```
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080/taskflow
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Instalação e execução
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Instale dependências, suba em modo dev e rode testes:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+npm test
+```
 
-## Learn More
+Build e produção:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Estrutura principal
+- `app/`: páginas (`/dashboard`, `/requests`, `/team`, `/users`, `/admin/settings`, `/login`).
+- `components/ui/`: componentes base (botões, inputs, cards, tabela, diálogo, etc.).
+- `hooks/`: `useAuth` (autenticação), `useToast`, `useGetData`, `useApiMutation`.
+- `services/`: `http` (Axios com interceptors), `api` (funções REST), `endpoints` (mapa de rotas), `types`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Autenticação — passo a passo
+A tela de login está em `components/auth/login.tsx`. O fluxo usa o hook `useAuth` e o endpoint `/auth/login` do backend.
 
-## Deploy on Vercel
+1. Acesse `/login`.
+2. Informe seu e-mail e senha.
+3. Ao autenticar, o token é salvo e você é redirecionado para `/dashboard`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Perfis ("3 tipos de login")
+Os três perfis suportados são:
+- **ADMIN**: acesso completo; pode criar/editar usuários e atualizar configurações.
+- **MANAGER (Gestor)**: gerencia pedidos da sua equipe.
+- **COLLABORATOR (Colaborador)**: solicita férias e acompanha status.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Se você utilizar o endpoint de seed (veja o backend), existem usuários de exemplo:
+- Admin: `iago.admin@taskflow.pt` / senha `123456`
+- Gestor: `iago.gestor@taskflow.pt` / senha `123456`
+- Colaborador: `iago.colab1@taskflow.pt` / senha `123456`
+
+## Chamadas de API principais
+Alguns endpoints utilizados (veja `services/endpoints.ts`):
+- `GET /vacations`: lista pedidos
+- `POST /vacations`: cria pedido
+- `POST /vacations/:id/approve`: aprova pedido
+- `POST /vacations/:id/reject`: rejeita pedido
+- `GET /users`, `POST /users`, `PUT /users/:id`, `DELETE /users/:id`
+- `GET /settings`, `PUT /settings`
+- `POST /auth/login`, `GET /auth/me`
+
+## Dicas de desenvolvimento
+- Em 401, o interceptor remove o token e redireciona para `/login`.
+- Ajuste `NEXT_PUBLIC_API_BASE_URL` caso rode o backend em outra porta/host.
+- Testes com Vitest e Testing Library já configurados.
