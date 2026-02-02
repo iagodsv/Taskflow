@@ -1,0 +1,18 @@
+# Global
+.DS_Store
+
+# Frontend
+taskflow-frontend/node_modules/
+taskflow-frontend/.next/
+taskflow-frontend/.vercel/
+taskflow-frontend/.turbo/
+taskflow-frontend/.env*
+taskflow-frontend/dist/
+
+# Backend
+taskflow-backend/target/
+taskflow-backend/.env*
+taskflow-backend/.idea/
+taskflow-backend/.classpath
+taskflow-backend/.project
+taskflow-backend/.settings/

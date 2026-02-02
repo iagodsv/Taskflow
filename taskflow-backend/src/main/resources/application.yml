@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: Vacation System
+  datasource:
+    url: jdbc:postgresql://localhost:5432/taskflow
+    username: taskflow
+    password: taskflow
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /taskflow
+
+jwt:
+  secret: taskflow-super-secret-jwt-key-32-bytes-2026-XX-YY
+  expiration: 86400000
