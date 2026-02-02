@@ -72,6 +72,59 @@ Ele cria:
 
 > Observação: Para o primeiro acesso, garanta que exista um **ADMIN** no banco (por exemplo, criando manualmente um usuário com senha Bcrypt). Depois disso, você poderá usar `/maintenance/seed` e os endpoints administrativos normalmente.
 
+### Admin inicial automático
+Se ao iniciar a aplicação não existir nenhum usuário com perfil `ADMIN`, um usuário administrativo é criado automaticamente com as credenciais definidas em `application.yml`.
+
+Como gerar o admin inicial (passo a passo):
+
+```bash
+# 1) Banco de dados (opcional se já estiver rodando)
+docker compose up -d
+
+# 2) Subir a aplicação (usando Maven Wrapper)
+./mvnw spring-boot:run
+
+# 3) Fazer login com o admin inicial para obter o token
+curl -X POST 'http://localhost:8080/taskflow/auth/login' \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"iago.admin@taskflow.pt","password":"123456"}'
+```
+
+Usuário criado por padrão (se não houver ADMIN):
+
+- Email: `iago.admin@taskflow.pt`
+- Senha: `123456`
+- Nome: `Administrador`
+- Perfil: `ADMIN`
+
+Essas credenciais vêm destas chaves no `application.yml`:
+
+```
+app:
+  admin:
+    email: iago.admin@taskflow.pt
+    password: 123456
+    name: Administrador
+```
+
+Você pode sobrescrever via variáveis de ambiente ou parâmetros JVM:
+
+```bash
+APP_ADMIN_EMAIL=meu.admin@empresa.com \
+APP_ADMIN_PASSWORD=minhaSenhaForte \
+APP_ADMIN_NAME="Admin Taskflow" \
+./mvnw spring-boot:run
+```
+
+Ou com `-D`:
+
+```bash
+./mvnw spring-boot:run \
+  -Dspring-boot.run.jvmArguments="-Dapp.admin.email=meu.admin@empresa.com -Dapp.admin.password=minhaSenhaForte -Dapp.admin.name=AdminTaskflow"
+```
+
+> Importante: altere a senha padrão em ambientes reais o quanto antes.
+
 ## Principais Endpoints
 - `POST /auth/login`: autenticação (email/senha). Retorna JWT.
 - `GET /auth/me`: dados do usuário autenticado.
