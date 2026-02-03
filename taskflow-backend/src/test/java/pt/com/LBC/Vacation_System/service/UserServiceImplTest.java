@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import pt.com.LBC.Vacation_System.dto.CreateUserRequest;
+import pt.com.LBC.Vacation_System.dto.UpdateUserRequest;
+import pt.com.LBC.Vacation_System.dto.UserResponseDTO;
 import pt.com.LBC.Vacation_System.model.Role;
 import pt.com.LBC.Vacation_System.model.User;
 import pt.com.LBC.Vacation_System.repository.UserRepository;
@@ -69,37 +72,39 @@ class UserServiceImplTest {
 
   @Test
   void onlyAdminCreatesUsers() {
-    User toCreate = new User();
-    toCreate.setName("NewUser");
-    toCreate.setEmail("new@example.com");
-    toCreate.setRole(Role.COLLABORATOR);
-    User created = userService.create(admin, toCreate);
+    CreateUserRequest request = new CreateUserRequest();
+    request.setName("NewUser");
+    request.setEmail("new@example.com");
+    request.setRole("COLLABORATOR");
+
+    UserResponseDTO created = userService.create(admin, request);
     assertNotNull(created.getId());
 
-    assertThrows(RuntimeException.class, () -> userService.create(manager, toCreate));
-    assertThrows(RuntimeException.class, () -> userService.create(collaboratorManaged, toCreate));
+    assertThrows(RuntimeException.class, () -> userService.create(manager, request));
+    assertThrows(RuntimeException.class, () -> userService.create(collaboratorManaged, request));
   }
 
   @Test
   void listByRole() {
-    List<User> adminList = userService.list(admin);
+    List<UserResponseDTO> adminList = userService.list(admin);
     assertTrue(adminList.size() >= 4);
 
-    List<User> managerList = userService.list(manager);
+    List<UserResponseDTO> managerList = userService.list(manager);
     assertTrue(
-        managerList.stream().allMatch(u -> u.getManager() != null && u.getManager().getId().equals(manager.getId())));
+        managerList.stream().allMatch(u -> u.getManagerId() != null && u.getManagerId().equals(manager.getId())));
 
-    List<User> collabList = userService.list(collaboratorManaged);
+    List<UserResponseDTO> collabList = userService.list(collaboratorManaged);
     assertEquals(1, collabList.size());
     assertEquals(collaboratorManaged.getId(), collabList.get(0).getId());
   }
 
   @Test
   void updateDeleteOnlyByAdmin() {
-    User updated = new User();
+    UpdateUserRequest updated = new UpdateUserRequest();
     updated.setName("Updated");
     updated.setEmail("a@example.com");
-    updated.setRole(Role.COLLABORATOR);
+    updated.setRole("COLLABORATOR");
+
     // Admin pode
     var res = userService.update(admin, collaboratorManaged.getId(), updated);
     assertEquals("Updated", res.getName());

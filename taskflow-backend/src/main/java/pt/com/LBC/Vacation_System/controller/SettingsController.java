@@ -10,10 +10,13 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import pt.com.LBC.Vacation_System.model.Settings;
+import lombok.extern.slf4j.Slf4j;
+import pt.com.LBC.Vacation_System.dto.SettingsRequestDTO;
+import pt.com.LBC.Vacation_System.dto.SettingsResponseDTO;
 import pt.com.LBC.Vacation_System.security.UserDetailsImpl;
 import pt.com.LBC.Vacation_System.service.SettingsService;
 
+@Slf4j
 @RestController
 @RequestMapping("/settings")
 public class SettingsController {
@@ -30,7 +33,8 @@ public class SettingsController {
       @ApiResponse(responseCode = "200", description = "Configurações retornadas"),
       @ApiResponse(responseCode = "401", description = "Não autenticado")
   })
-  public Settings get(@AuthenticationPrincipal UserDetailsImpl user) {
+  public SettingsResponseDTO get(@AuthenticationPrincipal UserDetailsImpl user) {
+    log.info("Buscando configurações. Requisitante: {}", user.getUser().getEmail());
     return service.get(user.getUser());
   }
 
@@ -42,8 +46,9 @@ public class SettingsController {
       @ApiResponse(responseCode = "403", description = "Sem permissão"),
       @ApiResponse(responseCode = "400", description = "Dados inválidos")
   })
-  public Settings update(@RequestBody Settings toUpdate,
+  public SettingsResponseDTO update(@RequestBody SettingsRequestDTO request,
       @AuthenticationPrincipal UserDetailsImpl user) {
-    return service.update(user.getUser(), toUpdate);
+    log.info("Atualizando configurações. Requisitante: {}", user.getUser().getEmail());
+    return service.update(user.getUser(), request);
   }
 }

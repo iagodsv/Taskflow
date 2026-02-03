@@ -1,80 +1,187 @@
 # Taskflow Vacation — Frontend
 
-Uma aplicação Next.js (React + Tailwind) que fornece a interface para gestão de férias: solicitação, aprovação, rejeição, administração de usuários e configurações.
+Aplicação Next.js (React + Tailwind) para gestão de férias: solicitação, aprovação, rejeição, administração de usuários e configurações.
 
-## Visão Geral
-- **Páginas**: Dashboard, Pedidos (Requests), Equipe (Team), Usuários, Admin/Configurações, Login.
-- **Arquitetura**: Roteamento via `app/`, componentes reutilizáveis em `components/ui`, hooks em `hooks/`, serviços REST em `services/`.
-- **Autenticação**: JWT armazenado em `localStorage` e inserido automaticamente em `Authorization: Bearer` nas requisições.
-- **Perfis de acesso**: `ADMIN`, `MANAGER` (Gestor) e `COLLABORATOR` (Colaborador).
+## 🚀 Início Rápido com Docker
 
-## Pré-requisitos
+A forma mais simples de rodar todo o sistema é via Docker Compose no backend:
+
+```bash
+cd ../taskflow-backend
+docker-compose up --build
+```
+
+Isso irá subir:
+
+| Serviço | Porta | URL |
+|---------|-------|-----|
+| PostgreSQL | 5432 | `localhost:5432` |
+| Backend (Java) | 8080 | http://localhost:8080/taskflow |
+| Frontend (Next.js) | 3000 | http://localhost:3000 |
+
+### Primeiro Acesso
+
+1. Acesse http://localhost:3000
+2. Faça login com:
+   - **Email**: `iago.admin@taskflow.pt`
+   - **Senha**: `123456`
+
+---
+
+## 🛠️ Desenvolvimento Local
+
+### Pré-requisitos
 - Node.js 20+ (recomendado: 20 LTS)
 - npm 10+
-- Backend rodando (veja o README do backend) acessível em `http://localhost:8080/taskflow` (padrão)
+- Backend rodando em `http://localhost:8080/taskflow`
 
-## Configuração
-- Variáveis de ambiente do Front:
-	- `NEXT_PUBLIC_API_BASE_URL`: URL base da API. Padrão: `http://localhost:8080/taskflow`
+### Instalação
 
-Crie um arquivo `.env.local` (opcional):
+```bash
+npm install
+```
+
+### Configuração (Opcional)
+
+Crie `.env.local` se o backend estiver em outra URL:
 
 ```
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8080/taskflow
 ```
 
-## Instalação e execução
-
-Instale dependências, suba em modo dev e rode testes:
+### Executando
 
 ```bash
-npm install
+# Desenvolvimento
 npm run dev
-npm test
-```
 
-Build e produção:
-
-```bash
+# Build de produção
 npm run build
 npm start
 ```
 
-## Estrutura principal
-- `app/`: páginas (`/dashboard`, `/requests`, `/team`, `/users`, `/admin/settings`, `/login`).
-- `components/ui/`: componentes base (botões, inputs, cards, tabela, diálogo, etc.).
-- `hooks/`: `useAuth` (autenticação), `useToast`, `useGetData`, `useApiMutation`.
-- `services/`: `http` (Axios com interceptors), `api` (funções REST), `endpoints` (mapa de rotas), `types`.
+### Testes
 
-## Autenticação — passo a passo
-A tela de login está em `components/auth/login.tsx`. O fluxo usa o hook `useAuth` e o endpoint `/auth/login` do backend.
+```bash
+npm test
+```
 
-1. Acesse `/login`.
-2. Informe seu e-mail e senha.
-3. Ao autenticar, o token é salvo e você é redirecionado para `/dashboard`.
+---
 
-### Perfis ("3 tipos de login")
-Os três perfis suportados são:
-- **ADMIN**: acesso completo; pode criar/editar usuários e atualizar configurações.
-- **MANAGER (Gestor)**: gerencia pedidos da sua equipe.
-- **COLLABORATOR (Colaborador)**: solicita férias e acompanha status.
+## 📁 Estrutura do Projeto
 
-Se você utilizar o endpoint de seed (veja o backend), existem usuários de exemplo:
-- Admin: `iago.admin@taskflow.pt` / senha `123456`
-- Gestor: `iago.gestor@taskflow.pt` / senha `123456`
-- Colaborador: `iago.colab1@taskflow.pt` / senha `123456`
+```
+taskflow-frontend/
+├── app/                    # Páginas (App Router)
+│   ├── dashboard/          # Dashboard principal
+│   ├── requests/           # Pedidos de férias
+│   ├── team/               # Visão da equipe
+│   ├── users/              # Gestão de usuários
+│   ├── admin/settings/     # Configurações (ADMIN)
+│   └── login/              # Autenticação
+├── components/
+│   ├── ui/                 # Componentes base (shadcn/ui)
+│   ├── auth/               # Login
+│   ├── header/             # Cabeçalho
+│   ├── sidebar/            # Menu lateral
+│   └── requests/           # Componentes de férias
+├── hooks/                  # Hooks customizados
+│   ├── useAuth.ts          # Autenticação
+│   ├── useGetData.ts       # Fetch de dados
+│   ├── useApiMutation.ts   # Mutations
+│   └── useToast.tsx        # Notificações
+├── services/               # Comunicação com API
+│   ├── api.ts              # Funções REST
+│   ├── http.ts             # Axios configurado
+│   ├── endpoints.ts        # Mapa de rotas
+│   └── types.ts            # Tipos TypeScript
+└── lib/                    # Utilitários
+```
 
-## Chamadas de API principais
-Alguns endpoints utilizados (veja `services/endpoints.ts`):
-- `GET /vacations`: lista pedidos
-- `POST /vacations`: cria pedido
-- `POST /vacations/:id/approve`: aprova pedido
-- `POST /vacations/:id/reject`: rejeita pedido
-- `GET /users`, `POST /users`, `PUT /users/:id`, `DELETE /users/:id`
-- `GET /settings`, `PUT /settings`
-- `POST /auth/login`, `GET /auth/me`
+---
 
-## Dicas de desenvolvimento
-- Em 401, o interceptor remove o token e redireciona para `/login`.
-- Ajuste `NEXT_PUBLIC_API_BASE_URL` caso rode o backend em outra porta/host.
-- Testes com Vitest e Testing Library já configurados.
+## 👥 Perfis de Acesso
+
+| Perfil | Acesso |
+|--------|--------|
+| **ADMIN** | Acesso completo: usuários, configurações, todos os pedidos |
+| **MANAGER** | Gerencia pedidos da sua equipe |
+| **COLLABORATOR** | Solicita férias e acompanha status |
+
+### Usuários de Exemplo
+
+| Perfil | Email | Senha |
+|--------|-------|-------|
+| ADMIN | iago.admin@taskflow.pt | 123456 |
+| MANAGER | iago.gestor@taskflow.pt | 123456 |
+| COLLABORATOR | iago.colab1@taskflow.pt | 123456 |
+
+---
+
+## 🔐 Autenticação
+
+O sistema usa JWT armazenado em `localStorage`:
+
+1. Usuário faz login em `/login`
+2. Token é salvo automaticamente
+3. Interceptor do Axios adiciona `Authorization: Bearer` em todas as requisições
+4. Em caso de 401, usuário é redirecionado para `/login`
+
+### Hook useAuth
+
+```typescript
+const { user, token, login, logout, isAuthenticated } = useAuth();
+```
+
+---
+
+## 📡 Endpoints Utilizados
+
+| Endpoint | Descrição |
+|----------|-----------|
+| `POST /auth/login` | Login |
+| `GET /auth/me` | Dados do usuário |
+| `GET /vacations` | Lista pedidos |
+| `POST /vacations` | Cria pedido |
+| `POST /vacations/:id/approve` | Aprova |
+| `POST /vacations/:id/reject` | Rejeita |
+| `GET /users` | Lista usuários |
+| `POST /users` | Cria usuário |
+| `PUT /users/:id` | Atualiza usuário |
+| `DELETE /users/:id` | Remove usuário |
+| `GET /settings` | Configurações |
+| `PUT /settings` | Atualiza configurações |
+
+---
+
+## 🎨 Componentes UI
+
+Baseados em [shadcn/ui](https://ui.shadcn.com/):
+
+- `Button`, `Input`, `Card`
+- `Dialog`, `Select`, `Badge`
+- `DataTable`, `Calendar`
+- `Toast` (notificações)
+
+---
+
+## ⚙️ Scripts Disponíveis
+
+| Comando | Descrição |
+|---------|-----------|
+| `npm run dev` | Desenvolvimento (hot reload) |
+| `npm run build` | Build de produção |
+| `npm start` | Executa build de produção |
+| `npm run lint` | Verifica código |
+| `npm test` | Executa testes |
+
+---
+
+## 🐛 Troubleshooting
+
+| Problema | Solução |
+|----------|---------|
+| CORS bloqueado | Verifique se backend está rodando |
+| 401 Unauthorized | Faça login novamente |
+| Porta 3000 ocupada | `lsof -i :3000` e mate o processo |
+| API não encontrada | Verifique `NEXT_PUBLIC_API_BASE_URL` |

@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
 import pt.com.LBC.Vacation_System.dto.VacationDTO;
-import pt.com.LBC.Vacation_System.model.VacationRequest;
+import pt.com.LBC.Vacation_System.dto.VacationResponseDTO;
 import pt.com.LBC.Vacation_System.security.UserDetailsImpl;
 import pt.com.LBC.Vacation_System.service.VacationService;
 
+@Slf4j
 @RestController
 @RequestMapping("/vacations")
 public class VacationController {
@@ -34,7 +36,8 @@ public class VacationController {
             @ApiResponse(responseCode = "200", description = "Lista retornada"),
             @ApiResponse(responseCode = "401", description = "Não autenticado")
     })
-    public List<VacationRequest> list(@AuthenticationPrincipal UserDetailsImpl user) {
+    public List<VacationResponseDTO> list(@AuthenticationPrincipal UserDetailsImpl user) {
+        log.info("Listando pedidos de férias. Requisitante: {}", user.getUser().getEmail());
         return service.list(user.getUser());
     }
 
@@ -45,8 +48,10 @@ public class VacationController {
             @ApiResponse(responseCode = "401", description = "Não autenticado"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos")
     })
-    public VacationRequest create(@RequestBody VacationDTO dto,
+    public VacationResponseDTO create(@RequestBody VacationDTO dto,
             @AuthenticationPrincipal UserDetailsImpl user) {
+        log.info("Criando pedido de férias. Período: {} a {}. Requisitante: {}",
+                dto.getStartDate(), dto.getEndDate(), user.getUser().getEmail());
         return service.create(user.getUser(), dto);
     }
 
@@ -58,9 +63,10 @@ public class VacationController {
             @ApiResponse(responseCode = "403", description = "Sem permissão"),
             @ApiResponse(responseCode = "404", description = "Pedido não encontrado")
     })
-    public void approve(@PathVariable Long id,
+    public VacationResponseDTO approve(@PathVariable Long id,
             @AuthenticationPrincipal UserDetailsImpl user) {
-        service.approve(id, user.getUser());
+        log.info("Aprovando pedido de férias com ID: {}. Requisitante: {}", id, user.getUser().getEmail());
+        return service.approve(id, user.getUser());
     }
 
     @PostMapping("/{id}/reject")
@@ -71,8 +77,9 @@ public class VacationController {
             @ApiResponse(responseCode = "403", description = "Sem permissão"),
             @ApiResponse(responseCode = "404", description = "Pedido não encontrado")
     })
-    public void reject(@PathVariable Long id,
+    public VacationResponseDTO reject(@PathVariable Long id,
             @AuthenticationPrincipal UserDetailsImpl user) {
-        service.reject(id, user.getUser());
+        log.info("Rejeitando pedido de férias com ID: {}. Requisitante: {}", id, user.getUser().getEmail());
+        return service.reject(id, user.getUser());
     }
 }

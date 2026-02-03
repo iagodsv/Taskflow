@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import pt.com.LBC.Vacation_System.dto.VacationDTO;
+import pt.com.LBC.Vacation_System.dto.VacationResponseDTO;
 import pt.com.LBC.Vacation_System.model.Role;
 import pt.com.LBC.Vacation_System.model.User;
 import pt.com.LBC.Vacation_System.model.VacationRequest;
@@ -75,10 +76,10 @@ class VacationServiceImplTest {
     dto.setStartDate(LocalDate.now());
     dto.setEndDate(LocalDate.now().plusDays(5));
     dto.setCollaboratorId(collaboratorOther.getId());
-    VacationRequest req = vacationService.create(admin, dto);
+    VacationResponseDTO req = vacationService.create(admin, dto);
     assertNotNull(req.getId());
-    assertEquals(VacationStatus.PENDING, req.getStatus());
-    assertEquals(collaboratorOther.getId(), req.getCollaborator().getId());
+    assertEquals("PENDING", req.getStatus());
+    assertEquals(collaboratorOther.getId(), req.getCollaboratorId());
   }
 
   @Test
@@ -87,7 +88,7 @@ class VacationServiceImplTest {
     dtoManaged.setStartDate(LocalDate.now());
     dtoManaged.setEndDate(LocalDate.now().plusDays(3));
     dtoManaged.setCollaboratorId(collaboratorManaged.getId());
-    VacationRequest ok = vacationService.create(manager, dtoManaged);
+    VacationResponseDTO ok = vacationService.create(manager, dtoManaged);
     assertNotNull(ok.getId());
 
     VacationDTO dtoOther = new VacationDTO();
@@ -102,8 +103,8 @@ class VacationServiceImplTest {
     VacationDTO dtoSelf = new VacationDTO();
     dtoSelf.setStartDate(LocalDate.now());
     dtoSelf.setEndDate(LocalDate.now().plusDays(2));
-    VacationRequest created = vacationService.create(collaboratorManaged, dtoSelf);
-    assertEquals(collaboratorManaged.getId(), created.getCollaborator().getId());
+    VacationResponseDTO created = vacationService.create(collaboratorManaged, dtoSelf);
+    assertEquals(collaboratorManaged.getId(), created.getCollaboratorId());
 
     VacationDTO dtoOther = new VacationDTO();
     dtoOther.setStartDate(LocalDate.now());
@@ -136,12 +137,11 @@ class VacationServiceImplTest {
     dto.setCollaboratorId(collaboratorManaged.getId());
     dto.setStartDate(LocalDate.now());
     dto.setEndDate(LocalDate.now().plusDays(3));
-    VacationRequest req = vacationService.create(admin, dto);
+    VacationResponseDTO req = vacationService.create(admin, dto);
 
     // manager do colaborador aprova
-    vacationService.approve(req.getId(), manager);
-    VacationRequest saved = vacationRepository.findById(req.getId()).orElseThrow();
-    assertEquals(VacationStatus.APPROVED, saved.getStatus());
+    VacationResponseDTO approvedDto = vacationService.approve(req.getId(), manager);
+    assertEquals("APPROVED", approvedDto.getStatus());
 
     // cria outro pendente do collaboratorOther
     VacationDTO dto2 = new VacationDTO();
@@ -149,14 +149,14 @@ class VacationServiceImplTest {
     // Define datas que não sobrepõem o primeiro período
     dto2.setStartDate(LocalDate.now().plusDays(4));
     dto2.setEndDate(LocalDate.now().plusDays(6));
-    VacationRequest req2 = vacationService.create(admin, dto2);
+    VacationResponseDTO req2 = vacationService.create(admin, dto2);
 
     // manager não consegue aprovar colaborador que não gerencia
     assertThrows(RuntimeException.class, () -> vacationService.approve(req2.getId(), manager));
 
     // admin consegue
-    vacationService.approve(req2.getId(), admin);
-    assertEquals(VacationStatus.APPROVED, vacationRepository.findById(req2.getId()).orElseThrow().getStatus());
+    VacationResponseDTO approvedDto2 = vacationService.approve(req2.getId(), admin);
+    assertEquals("APPROVED", approvedDto2.getStatus());
   }
 
   @Test
@@ -165,19 +165,18 @@ class VacationServiceImplTest {
     dto.setCollaboratorId(collaboratorManaged.getId());
     dto.setStartDate(LocalDate.now());
     dto.setEndDate(LocalDate.now().plusDays(1));
-    VacationRequest req = vacationService.create(admin, dto);
+    VacationResponseDTO req = vacationService.create(admin, dto);
 
     // manager do colaborador rejeita
-    vacationService.reject(req.getId(), manager);
-    VacationRequest saved = vacationRepository.findById(req.getId()).orElseThrow();
-    assertEquals(VacationStatus.REJECTED, saved.getStatus());
+    VacationResponseDTO rejectedDto = vacationService.reject(req.getId(), manager);
+    assertEquals("REJECTED", rejectedDto.getStatus());
 
     // outro caso: colaboradorOther pendente
     VacationDTO dto2 = new VacationDTO();
     dto2.setCollaboratorId(collaboratorOther.getId());
     dto2.setStartDate(LocalDate.now());
     dto2.setEndDate(LocalDate.now().plusDays(1));
-    VacationRequest req2 = vacationService.create(admin, dto2);
+    VacationResponseDTO req2 = vacationService.create(admin, dto2);
     assertThrows(RuntimeException.class, () -> vacationService.reject(req2.getId(), manager));
   }
 
@@ -198,15 +197,15 @@ class VacationServiceImplTest {
     r2.setStatus(VacationStatus.PENDING);
     vacationRepository.save(r2);
 
-    List<VacationRequest> adminList = vacationService.list(admin);
+    List<VacationResponseDTO> adminList = vacationService.list(admin);
     assertEquals(2, adminList.size());
 
-    List<VacationRequest> managerList = vacationService.list(manager);
+    List<VacationResponseDTO> managerList = vacationService.list(manager);
     assertEquals(1, managerList.size());
-    assertEquals(collaboratorManaged.getId(), managerList.get(0).getCollaborator().getId());
+    assertEquals(collaboratorManaged.getId(), managerList.get(0).getCollaboratorId());
 
-    List<VacationRequest> collabList = vacationService.list(collaboratorManaged);
+    List<VacationResponseDTO> collabList = vacationService.list(collaboratorManaged);
     assertEquals(1, collabList.size());
-    assertEquals(collaboratorManaged.getId(), collabList.get(0).getCollaborator().getId());
+    assertEquals(collaboratorManaged.getId(), collabList.get(0).getCollaboratorId());
   }
 }
