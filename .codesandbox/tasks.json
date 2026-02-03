@@ -2,27 +2,27 @@
   "$schema": "https://codesandbox.io/schemas/tasks.json",
   "setupTasks": [
     {
-      "name": "Install Frontend Dependencies",
-      "command": "cd taskflow-frontend && npm install"
-    },
-    {
-      "name": "Download Backend Dependencies",
-      "command": "cd taskflow-backend && ./mvnw dependency:go-offline -B"
+      "name": "Build Docker Images",
+      "command": "cd taskflow-backend && docker compose build"
     }
   ],
   "tasks": {
+    "start-all": {
+      "name": "Start All Services (Docker)",
+      "command": "cd taskflow-backend && docker compose up",
+      "runAtStart": true
+    },
     "frontend": {
-      "name": "Frontend (Next.js)",
-      "command": "cd taskflow-frontend && npm run dev",
+      "name": "Frontend Preview",
+      "command": "echo 'Frontend rodando via Docker'",
       "runAtStart": true,
       "preview": {
         "port": 3000
       }
     },
     "backend": {
-      "name": "Backend (Spring Boot)",
-      "command": "cd taskflow-backend && ./mvnw spring-boot:run",
-      "runAtStart": true,
+      "name": "Backend Preview",
+      "command": "echo 'Backend rodando via Docker'",
       "preview": {
         "port": 8080,
         "prPath": "/taskflow"
@@ -30,15 +30,20 @@
     },
     "swagger": {
       "name": "Swagger API Docs",
-      "command": "echo 'Swagger disponível após iniciar o Backend'",
+      "command": "echo 'Swagger UI'",
+      "runAtStart": true,
       "preview": {
         "port": 8080,
         "prPath": "/taskflow/swagger-ui/index.html"
       }
     },
     "database": {
-      "name": "Database (PostgreSQL)",
+      "name": "Database Only (PostgreSQL)",
       "command": "cd taskflow-backend && docker compose up postgres"
+    },
+    "stop-all": {
+      "name": "Stop All Services",
+      "command": "cd taskflow-backend && docker compose down"
     },
     "test-backend": {
       "name": "Run Backend Tests",
