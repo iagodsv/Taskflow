@@ -232,3 +232,4 @@ src/main/java/pt/com/LBC/Vacation_System/
 | Banco sem acesso | Verifique `docker-compose ps` |
 | Token inválido | Faça login novamente |
 | CORS bloqueado | Verifique origem permitida |
+| Login não funciona | Limpe o banco: `docker-compose down -v` e suba novamente |
