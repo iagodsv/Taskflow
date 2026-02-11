@@ -1,7 +1,9 @@
 package pt.com.LBC.Vacation_System.security;
 
+import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -23,6 +25,9 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
 
+    @Value("${cors.allowed-origins:http://localhost:3000,http://127.0.0.1:3000}")
+    private String allowedOrigins;
+
     public SecurityConfig(JwtAuthenticationFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
     }
@@ -37,12 +42,16 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/auth/**",
                                 "/public/**",
+                                "/actuator/**",
+                                "/actuator/health",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/webjars/**",
                                 "/swagger-resources/**",
                                 // Permissões também com o context-path definido (/taskflow)
+                                "/taskflow/actuator/**",
+                                "/taskflow/actuator/health",
                                 "/taskflow/swagger-ui.html",
                                 "/taskflow/swagger-ui/**",
                                 "/taskflow/v3/api-docs/**",
@@ -62,11 +71,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of(
-                "http://localhost:3000",
-                "http://127.0.0.1:3000",
-                "http://localhost:3001",
-                "http://127.0.0.1:3001"));
+        // Suporta origens dinâmicas via variável de ambiente
+        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        config.setAllowedOriginPatterns(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization", "Content-Type"));

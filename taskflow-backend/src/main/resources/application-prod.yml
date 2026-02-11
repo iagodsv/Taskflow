@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: Vacation System
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /taskflow
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000
+
+app:
+  admin:
+    email: ${ADMIN_EMAIL:admin@taskflow.pt}
+    password: ${ADMIN_PASSWORD:admin123456}
+    name: Administrador
+    role: ADMIN
+
+# CORS para permitir o frontend em produção
+cors:
+  allowed-origins: ${FRONTEND_URL:https://taskflow.vercel.app}

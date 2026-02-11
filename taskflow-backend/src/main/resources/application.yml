@@ -1,10 +1,12 @@
 spring:
   application:
     name: Vacation System
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   datasource:
-    url: jdbc:postgresql://localhost:5432/taskflow
-    username: taskflow
-    password: taskflow
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/taskflow}
+    username: ${DATABASE_USERNAME:taskflow}
+    password: ${DATABASE_PASSWORD:taskflow}
   jpa:
     hibernate:
       ddl-auto: update
@@ -14,18 +16,31 @@ spring:
         format_sql: true
 
 server:
-  port: 8080
+  port: ${PORT:8080}
   servlet:
     context-path: /taskflow
 
+# Health check para deploy (Render, etc.)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
 jwt:
-  secret: taskflow-super-secret-jwt-key-32-bytes-2026-XX-YY
+  secret: ${JWT_SECRET:taskflow-super-secret-jwt-key-32-bytes-2026-XX-YY}
   expiration: 86400000
 
 app:
   admin:
     # Credenciais iniciais do admin (somente usadas se não existir nenhum ADMIN na base)
-    email: iago.admin@taskflow.pt
-    password: 123456
+    email: ${ADMIN_EMAIL:iago.admin@taskflow.pt}
+    password: ${ADMIN_PASSWORD:123456}
     name: Administrador
     role: ADMIN
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:3000}
